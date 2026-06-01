@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Complete - MutationAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --card-bg: #161b22;
+            --neon-green: #00ff9d;
+            --neon-red: #ff4d4d;
+            --neon-blue: #00c8ff;
+            --text-light: #c9d1d9;
+            --border: #30363d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-light);
+        }
+    .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+        }
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+    .main-result { grid-column: 1 / -1; }
+    .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideIn 0.6s forwards;
+        }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.4s; }
+    .card:nth-child(4) { animation-delay: 0.6s; }
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+    .verdict {
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+            border: 2px solid;
+            margin-bottom: 25px;
+        }
+    .verdict-harmful {
+            border-color: var(--neon-red);
+            background: linear-gradient(135deg, rgba(255, 77, 77, 0.1), rgba(255, 77, 77, 0.05));
+            box-shadow: 0 0 40px rgba(255, 77, 77, 0.2);
+        }
+    .verdict-benign {
+            border-color: var(--neon-green);
+            background: linear-gradient(135deg, rgba(0, 255, 157, 0.1), rgba(0, 255, 157, 0.05));
+            box-shadow: 0 0 40px rgba(0, 255, 157, 0.2);
+        }
+    .verdict h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+    .verdict-harmful h2 { color: var(--neon-red); text-shadow: 0 0 20px var(--neon-red); }
+    .verdict-benign h2 { color: var(--neon-green); text-shadow: 0 0 20px var(--neon-green); }
+    .dna-visual {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+    .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+    .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+    .data-label { color: #8b949e; font-weight: 600; }
+    .data-value { color: var(--text-light); text-align: right; }
+    .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+    .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 1.5s ease-out;
+        }
+    .back-btn {
+            display: block;
+            width: 250px;
+            margin: 40px auto 0;
+            text-align: center;
+            padding: 15px;
+            background: transparent;
+            color: var(--neon-blue);
+            text-decoration: none;
+            border: 2px solid var(--neon-blue);
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: 'Orbitron';
+            transition: all 0.3s;
+        }
+    .back-btn:hover {
+            background: var(--neon-blue);
+            color: var(--bg-dark);
+            box-shadow: 0 0 25px var(--neon-blue);
+        }
+        @media (max-width: 768px) {
+        .report-grid { grid-template-columns: 1fr; }
+        .header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ANALYSIS COMPLETE</h1>
+            <p>MutationAI v2.0 | Status: Success</p>
+        </div>
+
+        <div class="main-result card">
+            {% if 'Harmful' in prediction %}
+            <div class="verdict verdict-harmful">
+                <h2>THREAT DETECTED</h2>
+                <p>{{ prediction }}</p>
+            </div>
+            {% else %}
+            <div class="verdict verdict-benign">
+                <h2>SEQUENCE STABLE</h2>
+                <p>{{ prediction }}</p>
+            </div>
+            {% endif %}
+            
+            <img src="{{ dna_image }}" class="dna-visual" alt="DNA Analysis">
+        </div>
+
+        <div class="report-grid">
+            <div class="card">
+                <h3>[01] INPUT PARAMETERS</h3>
+                <div class="data-row">
+                    <span class="data-label">GENE_SYMBOL</span>
+                    <span class="data-value">{{ gene }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">MUTATION_TYPE</span>
+                    <span class="data-value">{{ var_type }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">PHENOTYPE</span>
+                    <span class="data-value">{{ phenotype if phenotype else 'N/A' }}</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>[02] AI MODEL OUTPUT</h3>
+                <div class="data-row">
+                    <span class="data-label">CLASSIFICATION</span>
+                    <span class="data-value">{{ prediction }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">CONFIDENCE_SCORE</span>
+                    <span class="data-value">{{ confidence }}%</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" data-width="{{ confidence }}"></div>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">RISK_ASSESSMENT</span>
+                    <span class="data-value">{{ risk }}</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>[03] BIOLOGICAL ANALYSIS</h3>
+                <div class="data-row">
+                    <span class="data-label">ASSOCIATED_DISEASE</span>
+                    <span class="data-value">{{ disease }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">PREDICTED_EFFECT</span>
+                    <span class="data-value">{{ effect }}</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>[04] SYSTEM RECOMMENDATION</h3>
+                <p style="line-height: 1.7;">
+                    {% if 'Harmful' in prediction %}
+                    CRITICAL: This mutation exhibits high pathogenic potential. Immediate clinical validation and genetic counseling are strongly advised.
+                    {% else %}
+                    NOMINAL: This mutation is classified as likely benign. No immediate clinical action required based on current data.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+      <!-- Nee cursor vachiruka idam idhu -->
+
+     <!-- PDF Download Button - CORRECT VERSION -->
+<div style="text-align: center; margin-top: 30px; margin-bottom: 40px;">
+    <form action="/download_pdf" method="post">
+        <input type="hidden" name="gene" value="{{ gene }}">
+        <input type="hidden" name="var_type" value="{{ var_type }}">
+        <input type="hidden" name="phenotype" value="{{ phenotype }}">
+        <input type="hidden" name="prediction" value="{{ prediction }}">
+        <input type="hidden" name="risk" value="{{ risk }}">
+        <input type="hidden" name="confidence" value="{{ confidence }}">
+        <input type="hidden" name="summary" value="{{ summary }}">
+        <input type="hidden" name="disease" value="{{ disease }}">
+        <input type="hidden" name="effect" value="{{ effect }}">
+        
+        <button type="submit" style="background: linear-gradient(90deg, #0d6efd, #0a58ca); color: white; padding: 14px 32px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3); transition: all 0.2s;">
+            📄 DOWNLOAD CLINICAL REPORT
+        </button>
+    </form>
+</div>
+
+<a href="/" class="back-btn">← INITIATE NEW SCAN</a>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fillBar = document.querySelector('.confidence-fill');
+            if (fillBar) {
+                const width = fillBar.getAttribute('data-width');
+                setTimeout(() => {
+                    fillBar.style.width = width + '%';
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html>
