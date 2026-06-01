@@ -7,11 +7,21 @@ import os
 
 app = Flask(__name__)
 
-# Joblib use panni load pannu
-model = joblib.load('mutation_model.joblib')
-vectorizer = joblib.load('tfidf_vectorizer.joblib')
+# Joblib use panni load pannu - File check pottachu
+model = None
+vectorizer = None
 
-print("Model and Vectorizer loaded successfully! ✅")
+if os.path.exists('mutation_model.joblib') and os.path.exists('tfidf_vectorizer.joblib'):
+    try:
+        model = joblib.load('mutation_model.joblib')
+        vectorizer = joblib.load('tfidf_vectorizer.joblib')
+        print("Model and Vectorizer loaded successfully! ✅")
+    except Exception as e:
+        print(f"⚠️ Error loading model: {e}")
+        model = None
+        vectorizer = None
+else:
+    print("⚠️ Model files not found. Running in demo mode without ML model.")
 
 @app.route('/')
 def home():
@@ -19,6 +29,19 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    if model is None or vectorizer is None:
+        return render_template('result.html',
+                           gene="N/A",
+                           var_type="N/A",
+                           phenotype="N/A",
+                           prediction="Model Not Loaded",
+                           confidence=0,
+                           risk="N/A",
+                           disease="Please upload mutation_model.joblib & tfidf_vectorizer.joblib to GitHub",
+                           effect="Server running in demo mode",
+                           summary="ML model files are missing. Upload 'mutation_model.joblib' and 'tfidf_vectorizer.joblib' to your GitHub repo to enable predictions.",
+                           dna_image="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800")
+    
     gene = request.form['gene']
     var_type = request.form['var_type']
     phenotype = request.form['phenotype']
@@ -65,7 +88,7 @@ def predict():
 def download_pdf():
     data = {
         'gene': request.form['gene'],
-        'mutation': request.form['var_type'],  # var_type ah vangitu mutation nu maarom
+        'mutation': request.form['var_type'],
         'prediction': request.form['prediction'],
         'risk': request.form['risk'],
         'confidence': request.form['confidence'],
@@ -93,4 +116,4 @@ def download_pdf():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
